@@ -23,7 +23,7 @@ export function RecipeUpdateButton({ recipeId }: RecipeUpdateButtonProps) {
   useEffect(() => {
     async function fetchRecipe() {
       const response = await fetch(`/api/recipes/${recipeId}`);
-      const data = await response.json();
+      const data: FormData = await response.json();
       if (response.ok) {
         setInitialData(data);
       }
@@ -56,11 +56,11 @@ export function RecipeUpdateButton({ recipeId }: RecipeUpdateButtonProps) {
 
   return (
     <RecipeDialog
-      triggerText="Update"
+      triggerText="Update recipe"
       dialogTitle="Update recipe"
       dialogDescription="Update the form below to edit the recipe."
       submitButtonText="Save"
-      onSubmit={handleUpdateRecipe}
+      handleRecipe={handleUpdateRecipe}
       initialData={initialData}
     />
   );

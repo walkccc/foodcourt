@@ -1,13 +1,14 @@
-import type { Recipe, User } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { redirect } from 'next/navigation';
 
 import { DashboardHeader } from '@/components/dashboard-header';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { EmptyPlaceholder } from '@/components/empty-placeholder';
+import { RecipeCard } from '@/components/recipe-card';
 import { RecipeCreateButton } from '@/components/recipe-create-button';
-import { RecipeItem } from '@/components/recipe-item';
 import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
+import type { FullRecipe } from '@/types/prisma';
 
 export default async function DashboardPage() {
   const currentUser = await getCurrentUser();
@@ -15,7 +16,8 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const recipes = await getAllRecipesForAuthor(currentUser.id);
+  // const recipes: FullRecipe[] = await getAllRecipesForAuthor(currentUser.id);
+  const recipes: FullRecipe[] = await getAllRecipes();
 
   return (
     <DashboardShell>
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <RecipeItem key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
       )}
@@ -42,9 +44,19 @@ export default async function DashboardPage() {
   );
 }
 
-async function getAllRecipesForAuthor(userId: User['id']) {
+async function getAllRecipes(): Promise<FullRecipe[]> {
+  return await db.recipe.findMany({
+    include: { ingredients: true },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
+async function getAllRecipesForAuthor(
+  userId: User['id'],
+): Promise<FullRecipe[]> {
   return await db.recipe.findMany({
     where: { userId },
+    include: { ingredients: true },
     orderBy: { updatedAt: 'desc' },
   });
 }

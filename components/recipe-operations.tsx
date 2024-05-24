@@ -68,7 +68,6 @@ export function RecipeOperations({ recipe }: RecipeOperationsProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <RecipeUpdateButton recipeId={recipe.id} />
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -1,6 +1,6 @@
-import * as z from 'zod';
+import { z } from 'zod';
 
-import { getCurrentUser } from '@/lib/auth';
+import { canCurrentUserAccessToRecipe } from '@/lib/access';
 import { db } from '@/lib/db';
 import { recipeSchema } from '@/lib/validations/recipe';
 
@@ -24,29 +24,24 @@ export async function GET(
     }
 
     const recipe = await db.recipe.findUnique({
-      where: {
-        id: params.recipeId,
-      },
+      where: { id: params.recipeId },
+      include: { ingredients: true },
     });
-
-    console.log(recipe);
 
     return new Response(
       JSON.stringify({
         name: recipe?.name,
         description: recipe?.description,
-        ingredients: recipe?.ingredients,
+        ingredients: recipe?.ingredients.map((ingredient) => ingredient.name),
       }),
       {
         status: 200,
       },
     );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify(error.issues), { status: 422 });
-    }
-
-    return new Response(null, { status: 500 });
+  } catch (error: unknown) {
+    return error instanceof z.ZodError
+      ? new Response(JSON.stringify(error.issues), { status: 422 })
+      : new Response(null, { status: 500 });
   }
 }
 
@@ -65,18 +60,14 @@ export async function DELETE(
 
     // Delete the recipe.
     await db.recipe.delete({
-      where: {
-        id: params.recipeId,
-      },
+      where: { id: params.recipeId },
     });
 
     return new Response(null, { status: 204 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify(error.issues), { status: 422 });
-    }
-
-    return new Response(null, { status: 500 });
+  } catch (error: unknown) {
+    return error instanceof z.ZodError
+      ? new Response(JSON.stringify(error.issues), { status: 422 })
+      : new Response(null, { status: 500 });
   }
 }
 
@@ -98,40 +89,35 @@ export async function PATCH(
     const body = recipeSchema.parse(json);
 
     // Update the recipe.
-    // TODO: Implement sanitization for content.
-    await db.recipe.update({
-      data: {
-        name: body.name,
-        description: body.description,
-        ingredients: body.ingredients,
-      },
-      where: {
-        id: params.recipeId,
-      },
-    });
+    await db.$transaction([
+      db.ingredient.deleteMany({
+        where: {
+          AND: [
+            { recipeId: params.recipeId },
+            { NOT: { name: { in: body.ingredients ?? [] } } },
+          ],
+        },
+      }),
+      db.recipe.update({
+        where: { id: params.recipeId },
+        data: {
+          name: body.name,
+          description: body.description,
+          ingredients: {
+            connectOrCreate: (body.ingredients ?? []).map((ingredient) => ({
+              where: { name: ingredient },
+              create: { name: ingredient, bought: false },
+            })),
+          },
+          updatedAt: new Date(),
+        },
+      }),
+    ]);
 
     return new Response(null, { status: 200 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify(error.issues), { status: 422 });
-    }
-
-    return new Response(null, { status: 500 });
+  } catch (error: unknown) {
+    return error instanceof z.ZodError
+      ? new Response(JSON.stringify(error.issues), { status: 422 })
+      : new Response(null, { status: 500 });
   }
-}
-
-async function canCurrentUserAccessToRecipe(recipeId: string) {
-  const currentUser = await getCurrentUser();
-  if (!currentUser || !currentUser.id) {
-    return false;
-  }
-
-  const count = await db.recipe.count({
-    where: {
-      id: recipeId,
-      userId: currentUser.id,
-    },
-  });
-
-  return count > 0;
 }

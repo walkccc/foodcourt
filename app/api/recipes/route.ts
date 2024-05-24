@@ -20,7 +20,12 @@ export async function POST(req: Request) {
       data: {
         name: body.name,
         description: body?.description || '',
-        ingredients: body?.ingredients || [],
+        ingredients: {
+          create: (body.ingredients ?? []).map((ingredient) => ({
+            name: ingredient,
+            bought: false,
+          })),
+        },
         userId: currentUser.id,
       },
       select: {

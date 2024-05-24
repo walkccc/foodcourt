@@ -57,12 +57,24 @@ model Recipe {
   id          String   @id @default(cuid())
   name        String
   description String
-  ingredients String[]
   createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime @default(now()) @map(name: "updated_at")
+
+  ingredients Ingredient[] @relation()
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map(name: "recipes")
+}
+
+model Ingredient {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  bought Boolean @default(false)
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map(name: "ingredients")
 }

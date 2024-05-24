@@ -1,17 +1,7 @@
 import { DashboardConfig } from '@/types';
 
 export const dashboardConfig: DashboardConfig = {
-  navItems: [
-    {
-      title: 'Documentation',
-      href: '/docs',
-    },
-    {
-      title: 'Demo',
-      href: '/demo',
-      disabled: true,
-    },
-  ],
+  navItems: [],
   sidebarNavItems: [
     {
       title: 'Recipes',

@@ -39,8 +39,8 @@ export function RecipeCreateButton() {
       triggerText="New recipe"
       dialogTitle="New recipe"
       dialogDescription="Fill in the form below to create a new recipe."
-      submitButtonText="Save"
-      onSubmit={handleCreateRecipe}
+      submitButtonText="Create"
+      handleRecipe={handleCreateRecipe}
       initialData={undefined}
     />
   );
