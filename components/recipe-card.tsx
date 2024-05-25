@@ -14,12 +14,14 @@ import type { FullRecipe } from '@/types/prisma';
 
 type RecipeCardProps = {
   recipe: FullRecipe;
+  isOwner: boolean;
 };
 
 type CardProps = React.ComponentProps<typeof Card>;
 
 export async function RecipeCard({
   recipe,
+  isOwner,
   className,
   ...props
 }: CardProps & RecipeCardProps) {
@@ -33,11 +35,11 @@ export async function RecipeCard({
         <CardDescription>{recipe.description}</CardDescription>
       </CardHeader>
       <CardContent className="grid">
-        <IngredientsForm recipe={recipe} />
+        <IngredientsForm recipe={recipe} isOwner={isOwner} />
       </CardContent>
       <CardFooter className="flex justify-between">
         <RecipeOperations recipe={recipe} />
-        <RecipeUpdateButton recipeId={recipe.id} />
+        {isOwner && <RecipeUpdateButton recipeId={recipe.id} />}
       </CardFooter>
     </Card>
   );

@@ -28,9 +28,10 @@ type FormData = z.infer<typeof FormSchema>;
 
 interface IngredientsFormProps {
   recipe: FullRecipe;
+  isOwner: boolean;
 }
 
-export function IngredientsForm({ recipe }: IngredientsFormProps) {
+export function IngredientsForm({ recipe, isOwner }: IngredientsFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -103,6 +104,7 @@ export function IngredientsForm({ recipe }: IngredientsFormProps) {
                       >
                         <FormControl>
                           <Checkbox
+                            disabled={!isOwner}
                             checked={field.value?.includes(ingredient.name)}
                             onCheckedChange={(checked) => {
                               return checked

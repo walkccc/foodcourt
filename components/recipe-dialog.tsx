@@ -91,13 +91,13 @@ export function RecipeDialog({
           {triggerText}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 Name
@@ -144,23 +144,26 @@ export function RecipeDialog({
               >
                 Add
               </Button>
-              <div className="col-span-4">
-                {ingredients.map((ingredient, index) => (
-                  <p key={index} className="mb-2 flex items-center">
-                    <span className="mr-2 cursor-default rounded bg-foreground/10 px-3 py-1 hover:bg-gray-300">
-                      {ingredient}
-                    </span>
+            </div>
+            <div className="flex flex-wrap">
+              {ingredients.map((ingredient, index) => (
+                <>
+                  <span
+                    key={index}
+                    className="m-1 flex items-center gap-x-1 rounded bg-foreground/10 px-1 hover:bg-gray-300"
+                  >
+                    {ingredient}
                     <button
                       type="button"
                       onClick={() => handleRemoveIngredient(index)}
                       className="text-red-500"
                       aria-label={`Remove ${ingredient}`}
                     >
-                      <Icons.close className="h-4 w-4" />
+                      <Icons.close className="h-3 w-3" />
                     </button>
-                  </p>
-                ))}
-              </div>
+                  </span>
+                </>
+              ))}
             </div>
           </div>
           <DialogFooter>
